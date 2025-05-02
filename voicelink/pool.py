@@ -189,37 +189,34 @@ class Node:
                 return
             
     async def _listen(self) -> None:
-        backoff = ExponentialBackoff(base=7)
+    while True:
+        try:
+            msg = await self._websocket.receive()
 
-        while True:
-            try:
-                msg = await self._websocket.receive()
-
-                if msg.type == aiohttp.WSMsgType.CLOSED:
-                    self._available = False
-                    self._logger.warning(f"WebSocket closed for node [{self._identifier}]")
-                    break
-
-                elif msg.type == aiohttp.WSMsgType.ERROR:
-                    self._logger.error(f"WebSocket error for node [{self._identifier}]")
-                    break
-                
-                self._bot.loop.create_task(self._handle_payload(msg.json()))
-
-            except aiohttp.ClientConnectionError as e:
-                self._logger.error(f"Connection error: {e}")
+            if msg.type == aiohttp.WSMsgType.CLOSED:
                 self._available = False
+                self._logger.warning(f"WebSocket closed for node [{self._identifier}]")
+                break
+
+            elif msg.type == aiohttp.WSMsgType.ERROR:
+                self._logger.error(f"WebSocket error for node [{self._identifier}]")
                 break
             
-            except Exception as e:
-                self._logger.exception(f"Unexpected error: {e}")
-                self._available = False
-                break
+            self._bot.loop.create_task(self._handle_payload(msg.json()))
+
+        except aiohttp.ClientConnectionError as e:
+            self._logger.error(f"Connection error: {e}")
+            self._available = False
+            break
+            
+        except Exception as e:
+            self._logger.exception(f"Unexpected error: {e}")
+            self._available = False
+            break
 
         while not self._available:
-            retry = backoff.delay()
-            self._logger.info(f"Trying to reconnect node [{self._identifier}] in {round(retry)}s")
-            await asyncio.sleep(retry)
+            self._logger.info(f"Trying to reconnect node [{self._identifier}] in 14s")
+            await asyncio.sleep(14)  # Fixed 14-second delay
             try:
                 await self.connect()
             except Exception as e:
