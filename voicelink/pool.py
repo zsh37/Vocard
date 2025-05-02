@@ -204,7 +204,7 @@ class Node:
                     self._logger.error(f"WebSocket error for node [{self._identifier}]")
                     break
                 
-                
+                self._bot.loop.create_task(self._handle_payload(msg.json()))
 
             except aiohttp.ClientConnectionError as e:
                 self._logger.error(f"Connection error: {e}")
@@ -217,7 +217,6 @@ class Node:
                 break
 
         while not self._available:
-            retry = backoff.delay()
             self._logger.info(f"Trying to reconnect node [{self._identifier}] in 15s")
             await asyncio.sleep(15)
             try:
