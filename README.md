@@ -21,8 +21,6 @@ Vocard is a highly customizable Discord music bot, designed to deliver a user-fr
 * Supports docker
 * [Premium dashboard](https://github.com/ChocoMeow/Vocard-Dashboard)
 
-## Screenshot
-![features](https://github.com/user-attachments/assets/2a1baf75-d1c8-41d1-a66f-7011e96d5feb)
 
 ## Requirements
 * [Python 3.11+](https://www.python.org/downloads/)
